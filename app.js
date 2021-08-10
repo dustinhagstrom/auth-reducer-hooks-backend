@@ -2,8 +2,9 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 
+// const errorController = require("./routes/utils/errorController");
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
+const usersRouter = require("./routes/users/usersRouter");
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/api/users", usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -23,15 +24,25 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.all("*", function (req, res, next) {
-  next(
-    new ErrorMessageHandlerClass(
-      `Cannot find ${req.originalUrl} on this server! Check your URL`,
-      404
-    )
-  );
-});
+app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
-app.use(errorController);
+  // render the error page
+  res.status(err.status || 500);
+  res.json("error");
+});
+// error handler
+// app.all("*", function (req, res, next) {
+//   next(
+//     new ErrorMessageHandlerClass(
+//       `Cannot find ${req.originalUrl} on this server! Check your URL`,
+//       404
+//     )
+//   );
+// });
+
+// app.use(errorController);
 
 module.exports = app;
